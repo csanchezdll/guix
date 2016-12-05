@@ -98,6 +98,13 @@
           ((string-prefix? "aarch64" arch) "arm64")
           (else arch))))
 
+(define-public (system->defconfig system)
+  "Some systems (notably powerpc-linux) require a special target for kernel
+defconfig. Return the appropiate make target if applicable, otherwise return
+\"defconfig\"."
+  (cond ((string-prefix? "powerpc-" system) "pmac32_defconfig")
+        (else "defconfig")))
+
 (define (linux-libre-urls version)
   "Return a list of URLs for Linux-Libre VERSION."
   (list (string-append
@@ -137,11 +144,13 @@
            (lambda _
              (let ((arch ,(system->linux-architecture
                           (or (%current-target-system)
-                              (%current-system)))))
+                              (%current-system))))
+                   (defconfig ,(system->defconfig
+                               (or (%current-target-system)
+                                   (%current-system)))))
                (setenv "ARCH" arch)
                (format #t "`ARCH' set to `~a'~%" (getenv "ARCH"))
-
-               (and (zero? (system* "make" "defconfig"))
+               (and (zero? (system* "make" defconfig))
                     (zero? (system* "make" "mrproper" "headers_check"))))))
          (replace 'install
            (lambda* (#:key outputs #:allow-other-keys)
