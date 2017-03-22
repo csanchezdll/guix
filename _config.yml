@@ -1,3 +1,5 @@
 theme: jekyll-theme-minimal
 title: [Guix Hacking Blog]
 description: [Random notes on my experiments with Guix]
+gems:
+  - jekyll-mentions
